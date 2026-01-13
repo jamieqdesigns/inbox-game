@@ -1,0 +1,73 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Inbox Game – Clickable Flow Prototype</title>
+<style>
+body { font-family: Arial, sans-serif; background:#f4f4f4; padding:20px; }
+.container { max-width:420px; margin:auto; background:white; padding:15px; border-radius:8px; }
+.header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.timer { font-weight:bold; }
+.email { border-bottom:1px solid #ddd; padding:10px 0; }
+.email:last-child { border-bottom:none; }
+.meta { font-size:12px; color:#666; }
+.actions button { margin-right:5px; margin-top:5px; }
+.log { margin-top:15px; font-size:13px; background:#eee; padding:10px; border-radius:5px; }
+</style>
+<script>
+function act(item, action) {
+  const log = document.getElementById("log");
+  log.innerHTML += "• " + item + " → " + action + "<br>";
+}
+</script>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div><strong>Inbox</strong></div>
+    <div class="timer">⏱ 45s</div>
+  </div>
+
+  <div class="email">
+    <strong>Team Meeting Notes</strong>
+    <div class="meta">HR Dept · Internal · Stable</div>
+    <div class="actions">
+      <button onclick="act('Team Meeting Notes','Archive')">Archive</button>
+      <button onclick="act('Team Meeting Notes','Delete')">Delete</button>
+    </div>
+  </div>
+
+  <div class="email">
+    <strong>External Partnership Proposal</strong>
+    <div class="meta">External · Corrupt</div>
+    <div class="actions">
+      <button onclick="act('External Partnership Proposal','Archive')">Archive</button>
+      <button onclick="act('External Partnership Proposal','Delete')">Delete</button>
+    </div>
+  </div>
+
+  <div class="email">
+    <strong>Audit Summary 2019</strong>
+    <div class="meta">Compliance · Internal · Partial · REVIEW</div>
+    <div class="actions">
+      <button onclick="act('Audit Summary 2019','Inspect')">Inspect</button>
+      <button onclick="act('Audit Summary 2019','Delete')">Delete</button>
+    </div>
+  </div>
+
+  <div class="email">
+    <strong>Legacy Protocol File</strong>
+    <div class="meta">Archive Server · Internal · Corrupt</div>
+    <div class="actions">
+      <button onclick="act('Legacy Protocol File','Inspect')">Inspect</button>
+      <button onclick="act('Legacy Protocol File','Delete')">Delete</button>
+    </div>
+  </div>
+
+  <div class="log" id="log">
+    <strong>Action Log</strong><br>
+  </div>
+</div>
+</body>
+</html>
