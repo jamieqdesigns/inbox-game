@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Inbox Game – Swipe Prototype (iPhone 12)</title>
+
+  <style>
+    :root{
+      /* iPhone 12 logical CSS pixels (portrait): 390 x 844 */
+      --iphone12-w: 390px;
+      --iphone12-h: 844px;
+
+      --bg: #f2f2f7;
+      --card: #ffffff;
+      --border: rgba(0,0,0,0.10);
+      --shadow: rgba(0,0,0,0.08);
+
+      --green: #2e7d32;
+      --red: #c62828;
+      --text: #111;
+      --muted: #666;
+    }
+
+    /* Page background (desktop) */
+    body{
+      margin:0;
+      background: #111; /* desktop backdrop to emphasize phone frame */
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      min-height:100vh;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: var(--text);
+    }
+
+    /* Phone frame wrapper (desktop) */
+    .phone {
+      width: var(--iphone12-w);
+      height: var(--iphone12-h);
+      background: var(--bg);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 18px 50px rgba(0,0,0,0.35);
+      position: relative;
+    }
+
+    /* On a real phone, just fill the screen (no fake frame) */
+    @media (max-width: 480px) {
+      body{
+        background: var(--bg);
+        display:block;
+        min-height: 100vh;
+      }
+      .phone{
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        box-shadow:none;
+      }
+    }
+
+    /* Safe area padding for notch/home indicator */
+    .safe {
+      padding-top: env(safe-area-inset-top, 0px);
+      padding-right: env(safe-area-inset-right, 0px);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      padding-left: env(safe-area-inset-left, 0px);
+      height: 100%;
+      display:flex;
+      flex-direction:column;
+    }
+
+    /* Header */
+    .header {
+      background: var(--card);
+      padding: 14px 16px;
+      font-weight: 700;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      border-bottom: 1px solid var(--border);
+      flex: 0 0 auto;
+    }
+    .timer {
+      font-size: 14px;
+      font-weight: 700;
+      color: #444;
+    }
+
+    /* Inbox list region */
+    .inbox {
+      padding: 12px 12px 8px;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      flex: 1 1 auto;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px var(--shadow);
+      position: relative;
+
+      /* IMPORTANT for swipe: allow vertical scroll but not horizontal browser gestures */
+      touch-action: pan-y;
+      user-select: none;
+
+      /* smooth snap back */
+      transition: transform 0.18s ease;
+    }
+
+    .title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.25;
+    }
+
+    .meta {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* Swipe labels */
+    .action-label {
+      position:absolute;
+      top:50%;
+      transform: translateY(-50%);
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 0.06em;
+      opacity: 0;
+      pointer-events:none;
+    }
+    .archive { left: 14px; color: var(--green); }
+    .delete  { right: 14px; color: var(--red); }
+
+    /* Log fixed at bottom */
+    .log {
+      background: var(--card);
+      border-top: 1px solid var(--border);
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom, 0px));
+      font-size: 13px;
+      flex: 0 0 auto;
+    }
+    .log strong { display:block; margin-bottom:6px; }
+    .log .entries {
+      max-height: 90px;
+      overflow:auto;
+      -webkit-overflow-scrolling: touch;
+      color: #333;
+    }
+
+    /* Tiny helper hint */
+    .hint {
+      font-size: 12px;
+      color: #777;
+      margin-top: 4px;
+      font-weight: 500;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="phone">
+    <div class="safe">
+      <div class="header">
+        <div>
+          Inbox
+          <div class="hint">Swipe right = Archive/Inspect · Swipe left = Delete</div>
+        </div>
+        <div class="timer" id="timer">⏱ 45s</div>
+      </div>
+
+      <div class="inbox" id="inbox">
+        <div class="card" data-item="Team Meeting Notes">
+          <div class="title">Team Meeting Notes</div>
+          <div class="meta">HR · Internal · Stable</div>
+          <div class="action-label archive">ARCHIVE</div>
+          <div class="action-label delete">DELETE</div>
+        </div>
+
+        <div class="card" data-item="External Partnership Proposal">
+          <div class="title">External Partnership Proposal</div>
+          <div class="meta">External · Corrupt</div>
+          <div class="action-label archive">ARCHIVE</div>
+          <div class="action-label delete">DELETE</div>
+        </div>
+
+        <div class="card" data-item="Audit Summary 2019">
+          <div class="title">Audit Summary 2019</div>
+          <div class="meta">Compliance · Internal · Partial · REVIEW</div>
+          <div class="action-label archive">INSPECT</div>
+          <div class="action-label delete">DELETE</div>
+        </div>
+
+        <div class="card" data-item="Legacy Protocol File">
+          <div class="title">Legacy Protocol File</div>
+          <div class="meta">Archive Server · Internal · Corrupt</div>
+          <div class="action-label archive">INSPECT</div>
+          <div class="action-label delete">DELETE</div>
+        </div>
+
+        <div class="card" data-item="Quarterly Performance Review">
+          <div class="title">Quarterly Performance Review</div>
+          <div class="meta">Management · Internal · Stable</div>
+          <div class="action-label archive">ARCHIVE</div>
+          <div class="action-label delete">DELETE</div>
+        </div>
+      </div>
+
+      <div class="log">
+        <strong>Action Log</strong>
+        <div class="entries" id="log"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- Swipe mechanics ---
+    const SWIPE_INTENT_PX = 40;   // show label
+    const SWIPE_COMMIT_PX = 120;  // commit action
+
+    let startX = 0;
+    let activeCard = null;
+
+    function logAction(item, action) {
+      const log = document.getElementById('log');
+      const line = document.createElement('div');
+      line.textContent = `• ${item} → ${action}`;
+      log.appendChild(line);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function resetCard(card) {
+      card.style.transform = 'translateX(0px)';
+      const a = card.querySelector('.archive');
+      const d = card.querySelector('.delete');
+      if (a) a.style.opacity = 0;
+      if (d) d.style.opacity = 0;
+    }
+
+    function attachSwipe(card) {
+      card.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        activeCard = card;
+        // stop transition while dragging so it feels direct
+        card.style.transition = 'none';
+      }, { passive: true });
+
+      card.addEventListener('touchmove', (e) => {
+        if (!activeCard) return;
+        const dx = e.touches[0].clientX - startX;
+        activeCard.style.transform = `translateX(${dx}px)`;
+
+        const a = activeCard.querySelector('.archive');
+        const d = activeCard.querySelector('.delete');
+        if (a) a.style.opacity = dx > SWIPE_INTENT_PX ? 1 : 0;
+        if (d) d.style.opacity = dx < -SWIPE_INTENT_PX ? 1 : 0;
+      }, { passive: true });
+
+      card.addEventListener('touchend', (e) => {
+        if (!activeCard) return;
+
+        const dx = e.changedTouches[0].clientX - startX;
+        const item = activeCard.dataset.item || 'Item';
+
+        // restore snap transition
+        activeCard.style.transition = 'transform 0.18s ease';
+
+        if (dx > SWIPE_COMMIT_PX) {
+          logAction(item, 'Archive / Inspect');
+          activeCard.remove();
+        } else if (dx < -SWIPE_COMMIT_PX) {
+          logAction(item, 'Delete');
+          activeCard.remove();
+        } else {
+          resetCard(activeCard);
+        }
+
+        activeCard = null;
+      }, { passive: true });
+
+      card.addEventListener('touchcancel', () => {
+        if (!activeCard) return;
+        activeCard.style.transition = 'transform 0.18s ease';
+        resetCard(activeCard);
+        activeCard = null;
+      }, { passive: true });
+    }
+
+    document.querySelectorAll('.card').forEach(attachSwipe);
+
+    // Optional: basic timer tick (visual only for now)
+    let remaining = 45;
+    const timerEl = document.getElementById('timer');
+    setInterval(() => {
+      remaining = Math.max(0, remaining - 1);
+      timerEl.textContent = `⏱ ${remaining}s`;
+    }, 1000);
+  </script>
+</body>
+</html>
